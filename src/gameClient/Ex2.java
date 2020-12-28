@@ -16,10 +16,7 @@ import Server.Game_Server_Ex2;
 public class Ex2 implements Runnable{
 	private static MyFrame _win;
 	private static Arena _ar;
-	private static List<CL_Pokemon> pokemons;
-
 	static  int time=0;
-	//HashMap<String,edge_data>edge=new HashMap<String,edge_data>();
 	public static void main(String[] a) {
 		Thread client = new Thread(new Ex2());
 		client.start();
@@ -27,10 +24,10 @@ public class Ex2 implements Runnable{
 
 	@Override
 	public void run() {
-		int scenario_num =11;
+		int scenario_num =11 ;
 		game_service game = Game_Server_Ex2.getServer(scenario_num); // you have [0,23] games
-		//	int id = 999;
-		//	game.login(id);
+//			int id = 999;
+//			game.login(id);
 		String g = game.getGraph();
 		String pks = game.getPokemons();
 		DWGraph_Algo algo =new DWGraph_Algo();
@@ -68,154 +65,90 @@ public class Ex2 implements Runnable{
 	 * @param
 	 */
 	private static void moveAgants(game_service game, directed_weighted_graph gg) {
+
 		String lg = game.move();
 		List<CL_Agent> log = Arena.getAgents(lg, gg);
 		_ar.setAgents(log);
-		dw_graph_algorithms algo = new DWGraph_Algo();
-		algo.init(gg);
 
-
-		String fs = game.getPokemons();
+		String fs =  game.getPokemons();
 		List<CL_Pokemon> pok = Arena.json2Pokemons(fs);
-		pokemons = Arena.json2Pokemons(fs);
 		_ar.setPokemons(pok);
-
-
-		Queue<Double> mindist1 = new PriorityQueue<>(new Comparator<Double>() {
-			@Override
-			public int compare(Double o1, Double o2) {
-				if (o1 < o2) {
-					return -1;
-				} else if (o1 > o2) {
-					return 1;
-				}
-				return 0;
-			}
-		});
-		Queue<CL_Pokemon> bestvaluepok = new PriorityQueue<>(new Comparator<CL_Pokemon>() {
-			@Override
-			public int compare(CL_Pokemon o1, CL_Pokemon o2) {
-				if (o1.getValue() < o2.getValue()) {
-					return 1;
-				} else if (o1.getValue() > o2.getValue()) {
-					return -1;
-				}
-				return 0;
-			}
-		});
-		for (CL_Pokemon list : pokemons) {
-			bestvaluepok.add(list);
+		int size_pok=-1;
+		List<CL_Pokemon>help=new LinkedList<>() ;
+		for (CL_Pokemon pokemon:pok){
+			help.add(pokemon);
 		}
-		List<Temp_POK> listofvalue = new LinkedList<>();
 
-
-		for (int i = 0; i < log.size(); i++) {
+		for(int i=0;i<log.size();i++) {
 			CL_Agent ag = log.get(i);
 			int id = ag.getID();
 			int dest = ag.getNextNode();
 			int src = ag.getSrcNode();
 			double v = ag.getValue();
 
-			if (dest == -1) {
+			if(dest==-1) {
 
-				List<node_data> pathToPokemon = pathToPok(gg, src);
 
-				Temp_POK pok1 = new Temp_POK();
-				pok1.setPath_pok(pathToPokemon);
-				int key = 0;
-				for (node_data path : pathToPokemon) {
-					key = path.getKey();
+				List<node_data> pathToPokemon = pathToPok(gg,src,help,size_pok);
+
+
+				for (node_data curr : pathToPokemon) {
+					dest=curr.getKey();
+					game.chooseNextEdge(ag.getID(),dest);
 				}
-				double tempmin = algo.shortestPathDist(src, key);
-				mindist1.add(tempmin);//this for min path queue
-				pok1.setDist(tempmin);//update the distance
-				pok1.setAgent(ag);
-				listofvalue.add(pok1);//מחסן
+				System.out.println("Agent: "+id+", val: "+v+"   turned to node: "+dest+ ", "+ "speed:"+ag.getSpeed());
 
 			}
 		}
-
-         //find min dis
-		Temp_POK finaly=null;
-		double bestpath= mindist1.poll();
-		for (Temp_POK find:listofvalue){
-			if(bestpath==find.getDist()){
-				finaly=find;
-				break;
-			}
-		}
-		//find the pok and set the pokemon to true
-		CL_Pokemon pokemonb=bestvaluepok.poll();
-		for (int i=0;i<pokemons.size();i++){
-			if(pokemonb.getValue()==pokemons.get(i).getValue()){
-				pokemons.get(i).setflag(true);
-				break;
-			}
-		}
-		mindist1.clear();
-		listofvalue.clear();
-		CL_Agent agent= finaly.getAgent();
-		//Arena.updateEdge(pokemons.get(j),algo.getGraph());
-
-				for (node_data p : finaly.getPath_pok()) {
-					game.chooseNextEdge(finaly.getAgent().getID(), p.getKey());
-					System.out.println("Agent: " + finaly.getAgent().getID() + ", val: " + finaly.getAgent().getValue() + "turned to node: " + p.getKey() + ", " + "speed:" + finaly.getAgent().getSpeed());
-				}
-			}
+	}
 
 
-
-
-
-
-
-	public static List<node_data> pathToPok(directed_weighted_graph g, int src) {
+	public static List<node_data> pathToPok(directed_weighted_graph g, int src,List help,int index_pok){
 		dw_graph_algorithms algo = new DWGraph_Algo();
 		algo.init(g);
 		int dest = 0;
-		int index = 0;
+		List<CL_Pokemon>help2=new LinkedList<>();
+		for (Object temp:help){
+			help2.add((CL_Pokemon) temp);
+		}
+		int index=0;
 		double val1;
-		double val2 = 0;
-		boolean flag = false;
-		CL_Pokemon maxVaule = null;
-		for (int i = 0; i < pokemons.size(); i++) {
-			Arena.updateEdge(pokemons.get(i), g);
-			val1 = pokemons.get(i).getValue();
-			if (pokemons.get(i).getflag() == false) {
+		double val2= 0;
+		boolean flag=false;
+		CL_Pokemon maxVaule=null;
+		for (int i=0;i<help2.size();i++) {
+			Arena.updateEdge((CL_Pokemon) help2.get(i), g);
+			val1 = help2.get(i).getValue();
+			if (help2.get(i).getflag() == false) {
 				if (val1 > val2) {
 					val2 = val1;
 					index = i;
 					flag = true;
+
 				}
 			}
 		}
-		if (flag == true) {
+
+		if(flag==true) {
+			help2.get(index).setflag(true);
+			if (help2.get(index).getType()== -1 && src < help2.get(index).get_edge().getSrc() ) {
+				dest=help2.get(index).get_edge().getSrc();
+				return algo.shortestPath(src, dest);
+			}
+			else {
+
+				dest =help2.get(index).get_edge().getDest();
+
+				if (src == dest) {
+					dest=help2.get(index).get_edge().getSrc();
+					return algo.shortestPath(src, dest);
 
 
-			if (pokemons.get(index).getType() == -1) {
-				if (pokemons.get(index).get_edge().getDest() < pokemons.get(index).get_edge().getSrc()) {
-					dest = pokemons.get(index).get_edge().getDest();
-					return algo.shortestPath(src, dest);
-				} else {
-					dest = pokemons.get(index).get_edge().getSrc();
-					return algo.shortestPath(src, dest);
 				}
 			}
-			if (pokemons.get(index).getType() == 1) {
-				if (pokemons.get(index).get_edge().getSrc() > pokemons.get(index).get_edge().getDest()) {
-					dest = pokemons.get(index).get_edge().getDest();
-					return algo.shortestPath(src, dest);
-				} else {
-					dest = pokemons.get(index).get_edge().getDest();
-					return algo.shortestPath(src, dest);
-				}
-			}
-
 		}
 		return algo.shortestPath(src, dest);
 	}
-
-
 
 
 
@@ -227,14 +160,12 @@ public class Ex2 implements Runnable{
 	 * @return
 	 */
 	private static int nextNode(directed_weighted_graph g, int src,int dest) {
-//	private static int nextNode(directed_weighted_graph g, int src) {//, List<node_data> pathToPokemon) {
+
 		int ans = -1;
-		//	g.getNode(src);
+
 		int dest1=0;
-//		for (node_data curr : pathToPokemon) {
-//			dest=curr.getKey();
-//			break;
-//		}
+
+
 		Collection<edge_data> ee = g.getE(src);
 		Iterator<edge_data> itr = ee.iterator();
 		//	int s = ee.size();
@@ -244,11 +175,7 @@ public class Ex2 implements Runnable{
 			if(ans!=dest)
 				itr.next();
 		}
-//		int r = (int)(Math.random()*s);
-//		int i=0;
-//		while(i<r) {itr.next();i++;}
-//
-//		ans = itr.next().getDest();
+
 
 		return ans;
 	}
@@ -277,37 +204,15 @@ public class Ex2 implements Runnable{
 			System.out.println(game.getPokemons());
 			int src_node = 0;  // arbitrary node, you should start at one of the pokemon
 			ArrayList<CL_Pokemon> cl_fs = Arena.json2Pokemons(game.getPokemons());
-			pokemons=Arena.json2Pokemons(game.getPokemons());
-			//	List<CL_Agent> log ;
-			//	List<CL_Agent> agents= Arena.getAgents(g,algo.getGraph());
-//			List<CL_Agent> log = Arena.getAgents(g, algo.getGraph());
-//			_ar.setAgents(log);
 			int dest = 0;
-//			Queue<Double> q = new PriorityQueue<Double>(new Comparator<Double>() {
-//				@Override
-//				public Double compare(Object a,Object b) {
-//					// compare if the tag is smaller he will get much more priority
-//					double A=  a;
-//					double B=  b;
-//					if (a.getValue()>b.getValue()) {
-//						return a.getValue();
-//					}
-//
-//					else if (a.getValue()<b.getValue()) {
-//						return b.getValue();
-//					}
-//					return 0.0;
-//				}
-//			});
 
 			for (int i = 0; i < cl_fs.size(); i++) {
 				{
 					Arena.updateEdge(cl_fs.get(i), algo.getGraph());
-					Arena.updateEdge(pokemons.get(i),algo.getGraph());
 				}
 			}
-			//	CL_Pokemon maxValue = null;
-//			int index=0;
+	;
+
 			for (int i = 0; i <rs; i++)//agent
 			{
 				dest = 0;
@@ -328,23 +233,21 @@ public class Ex2 implements Runnable{
 				}
 				if (maxValue != null) {
 					if (maxValue.getType() == 1&&maxValue.getflag()==false) {
-//							agents = Arena.getAgents(game.getAgents(), algo.getGraph());
-//							_ar.setAgents(agents);
+
 						if(maxValue.get_edge().getSrc()>maxValue.get_edge().getDest()){
 							game.addAgent(maxValue.get_edge().getDest());
 
 						}else {
 							game.addAgent(maxValue.get_edge().getSrc());
-							//game.chooseNextEdge(maxValue.get_edge().getSrc(), maxValue.get_edge().getDest());
+							game.chooseNextEdge(maxValue.get_edge().getSrc(), maxValue.get_edge().getDest());
 						}
-//							cl_fs.remove(dest);
+
 						maxValue.setflag(true);
 						maxValue = null;
-						//	_ar.setAgents(log);
+
 
 					} else if (maxValue.getType() == -1&&maxValue.getflag()==false) {
-//							agents=Arena.getAgents(game.getAgents(), algo.getGraph());
-//							_ar.setAgents(agents);
+
 						if(maxValue.get_edge().getSrc()>maxValue.get_edge().getDest()){
 							game.addAgent(maxValue.get_edge().getSrc());
 
@@ -352,10 +255,10 @@ public class Ex2 implements Runnable{
 							game.addAgent(maxValue.get_edge().getDest());
 							game.chooseNextEdge(maxValue.get_edge().getDest(), maxValue.get_edge().getSrc());
 						}
-//							cl_fs.remove(dest);
+
 						maxValue.setflag(true);
 						maxValue = null;
-						//	_ar.setAgents(log);
+
 					}
 				}
 				cl_fs.remove(dest);
@@ -364,5 +267,4 @@ public class Ex2 implements Runnable{
 		}
 		catch (JSONException e) {e.printStackTrace();}
 	}
-
 }
