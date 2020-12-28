@@ -14,6 +14,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.gson.Gson;
@@ -322,123 +323,73 @@ public class DWGraph_Algo implements dw_graph_algorithms,Serializable {
 	}
 
 
-//
-//	@Override
-//	public List<node_data> shortestPath(int src, int dest) {
-//		if(this.graph.getNode(src)==null||this.graph.getNode(dest)==null) {
-//		     return null;
-//		 	}
-//
-//Queue<Temp_Node> q = new PriorityQueue<Temp_Node>(new Comparator<Temp_Node>() {
-//
-//			public int compare(Temp_Node a, Temp_Node b) {
-//				// compare if the tag is smaller he will get much more priority
-//				if (a.getTag() < b.getTag()) {
-//					return -1;
-//				}
-//				else if (a.getTag() > b.getTag()) {
-//					return 1;
-//				}
-//				return 0;
-//			}
-//		});
-//        List<node_data>list=new LinkedList<node_data>();
-//        list.add(this.graph.getNode(src));
-//
-//		HashMap<Integer,Temp_Node> visited=new HashMap<Integer,Temp_Node>();
-//		for (node_data node:this.graph.getV()) {
-//			Temp_Node s=new Temp_Node(node);
-//			s.setKey(node.getKey());
-//			s.setTag(Double.MAX_VALUE);
-//			s.setVisit(false);
-//			visited.put(s.getKey(),s);
-//
-//		}
-//		Queue<Temp_Node> pq = new LinkedList<Temp_Node>() ;
-//		Temp_Node min=null;
-//		boolean flag=false;
-//		Temp_Node src1=visited.get(src);
-//		src1.setTag(0);
-//         pq.add(src1);
-//
-//
-//
-//      while(!pq.isEmpty()) {
-//    	  Temp_Node u=pq.poll();
-//
-//    	  if(this.graph.getE(u.getKey())!=null) {
-//				for (edge_data node1:this.graph.getE(u.getKey())){
-//
-//				flag=true;
-//					Temp_Node vertex=visited.get(node1.getDest());
-//				       edge_data z= this.graph.getEdge(u.getKey(),node1.getDest());
-//
-//					if(u.getTag()+z.getTag()<vertex.getTag()) {
-//					       vertex.setTag(u.getTag()+z.getWeight());
-//					       vertex.setPrev(u);
-//					}
-//					q.add(vertex);
-//				}
-//
-//      }
-//    	  min=q.poll();
-//    	  if(min.getKey()!=dest) {
-//    		  edge_data temp= this.graph.getEdge(u.getKey(),min.getKey());
-//    		  //change dirction
-//    	 if(!this.graph.getE(u.getKey()).contains(temp)) {
-//
-//    		 list.remove(this.graph.getNode(u.getKey()));
-//    		 list.add(this.graph.getNode(min.getKey()));
-//    		 for (edge_data node:this.graph.getE(u.getKey())) {
-//				for (Temp_Node node1:q) {
-//					if(node1.getKey()==node.getDest()) {
-//						q.remove(node1);
-//					}
-//				}
-//			}
-//
-//    	 }
-//    	 else {
-//    		 list.add(this.graph.getNode(min.getKey()));
-//    	 }
-//    	  if(flag==true) {
-//    	  pq.add(min);
-//    	  flag=false;
-//    	  }
-//      }
-//      }
-//      list.add(this.graph.getNode(dest));
-//
-//		return list;
-//	}
 
-	
-	@Override
-	public boolean save(String file) {
-		// TODO Auto-generated method stub
-		return false;
+@Override
+	public boolean save(String file) throws JSONException {
+		//graph
+		JSONObject g = new JSONObject();
+
+		JSONArray nodes = new JSONArray();
+		JSONArray edges = new JSONArray();
+
+		for (node_data current : getGraph().getV()) {
+
+			JSONObject node = new JSONObject();
+			if (current.getLocation() != null) {
+				node.put("pos" ,current.getLocation().toString());
+			}
+			else {
+				node.put("pos", "0.0,0.0,0.0");
+				node.put("id", current.getKey());
+				nodes.put(node);
+			}
+			for (edge_data ni : getGraph().getE(current.getKey())) {
+
+				JSONObject edge = new JSONObject();
+				edge.put("src", ni.getSrc());
+				edge.put("w", ni.getWeight());
+				edge.put("dest", ni.getDest());
+
+				edges.put(edge);
+
+			}
+		}
+		try {
+			FileWriter fw = new FileWriter(file);
+
+			g.put("Edges", edges);
+			g.put("Nodes", nodes);
+			fw.write(g.toString());
+			fw.flush();
+		} catch (IOException ex) {
+			return false;
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return true;
 	}
 
 	@Override
+
     public boolean load(String file) {
         directed_weighted_graph g = new DWGraph_DS();
         try {
 
             JSONObject obj_JsonObject = new JSONObject(file);
-            JSONArray jsonArrayEdges = obj_JsonObject.getJSONArray("Edges"); // Array for the vertexes
-            JSONArray jsonArrayNodes = obj_JsonObject.getJSONArray("Nodes");// Array for the edges
-            for (int i = 0; i < jsonArrayNodes.length(); i++) { // Add the vertex by the position
+            JSONArray jsonArrayEdges = obj_JsonObject.getJSONArray("Edges"); // Array  vertexes
+            JSONArray jsonArrayNodes = obj_JsonObject.getJSONArray("Nodes");// Array  edges
+            for (int i = 0; i < jsonArrayNodes.length(); i++) { // put vertexes in position
                 JSONObject JSON_Node = jsonArrayNodes.getJSONObject(i);
-                String pos = JSON_Node.getString("pos");// Extract the coordinates to String
-                int id = JSON_Node.getInt("id"); // Extract the node ID
-                geo_location p = new Geo(pos); // get p coordinates from getXYZ function
+                String pos = JSON_Node.getString("pos");// to string String
+                int id = JSON_Node.getInt("id"); //  node ID
+                geo_location p = new Geo(pos); // give the location  x and y and z
                 node_data n = new Node(p, id);
-                g.addNode(n); // Add new vertex to the graph
+                g.addNode(n); // Add  vertex
             }
-            for (int i = 0; i < jsonArrayEdges.length(); i++) { // Add the edges by the vertex
+            for (int i = 0; i < jsonArrayEdges.length(); i++) { // add vertexes by edge
                 JSONObject JSON_Edge = jsonArrayEdges.getJSONObject(i);
-                int src = JSON_Edge.getInt("src"); // Extract source
-                int dest = JSON_Edge.getInt("dest"); // Extract destination
+                int src = JSON_Edge.getInt("src"); //  src
+                int dest = JSON_Edge.getInt("dest"); // dest
                 double w = JSON_Edge.getDouble("w");
                 g.connect(src, dest, w);
             }
