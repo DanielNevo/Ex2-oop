@@ -153,3 +153,9 @@ saves the graph to the given file name.
 boolean load(String file):
 load a graph from the file to this graph algorithm.
 
+pokemon game:
+In the game we have Pokemon and agents
+The goal of the game is to eat as many Pokemon as possible and get as high a score as possible
+the agents need to be smart and to know how to move each step 
+
+
