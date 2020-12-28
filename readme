@@ -1,0 +1,155 @@
+Ex2oop
+This is an object oriented programmin project which his main idea is based on functions.
+
+This Project Made by Yosef Desse and Daniel Nevo Students in Ariel University.
+
+at this project we implement the data structure of directional weighted graph with vertexs and edges.
+
+we implement a 4 main classes: Node, edge_data , WGraph_DS , WGraph_Algo and These classes contains serval methods.
+
+
+Class Node:
+
+This Class represents the set of operations applicable on a single node(vertex) in a directional weighted graph. Every node gets it key, tag and info.
+this class contains several functions:
+
+int getKey():
+Returns the node key.
+
+geo_location getLocation():
+return the node location.
+
+void setLocation(gio_location p) :
+set a new location by given p.
+
+double getWeight() :
+return the node weight.
+
+void setWeight(double w) :
+set a new weight by given new double w.
+
+String getInfo() :
+return the  node info.
+
+void setInfo(String s ) :
+set a new info for node by given String s.
+
+int getTag() :
+return the node Tag.
+
+void setTag(int t) :
+set a new Tag for the node by given int t.
+
+double getDis() :
+return the dis of the node.
+
+void setDis(double d) :
+set a new dis for the node.
+
+String toString() :
+printing the data of the node .
+
+
+Class Edge :
+This Class represents the set of operations applicable on a  edge(src,dest) in a directional weighted graph.
+this class contains several functions:
+
+int getSrc() :
+return the surce of the edge.
+
+int getDest() :
+return the destination of the edge.
+double getWeight() :
+return the weight of the edge.
+
+void setWeight(double w) :
+set a new weight on the edge by given new double w.
+
+String getInfo() :
+return the edge info.
+
+void setInfo(String s ) :
+set a new info on the edge by given new String s.
+
+int getTag() :
+return the tag of the edge.
+
+void setTag(int t ) :
+set a new tag on the edge by given new int t.
+
+String toString() :
+printing the data of the edge.
+
+
+Class WGraph_DS:
+
+This class represents the set of opretions applicable on graph in a directional weighted graph. 
+we implement this Graph with a two data structure one called HashMap<Integer,Value> graph and the second called HashMap<Integer,HashMap<Integer,edge_data>>neighbors.
+ one contains the Nodes and the other one contains the nodes and all the  edges of the same node.
+this class contains several functions:
+
+node_data getNode(int key):
+return node by given key.
+
+edge_data getEdge(int src, int dest):
+check if there is an edge between src and dest and if there such edge, return the edge between src and dest ,else return null.
+
+void addNode(node_data n):
+add a new node to the graph.
+
+void connect(int src, int dest):
+add an edge between src and dest. If and there is already edge exists between src and dest just update the Weight
+
+collection<node_data> getV():
+return all the vertice in the graph
+
+collection<edge_data>  getV(int node_id):
+return all the neighbors of the given node_id
+
+node_data removeNode(int key) :
+delete the node by given key from the graph and delete him from all his neighbors (edges).
+
+edge_data removeEdge(int src, int dest):
+remove the edge between src and dest and return the data of the same edge.
+
+int nodeSize():
+return the number of the nodes in the graph.
+
+int edgeSize():
+return the number of the edges in the graph.
+
+String toString() :
+printing the data of the graph.
+
+Class WGraph_Algo:
+This Class represents the "regular" Graph Theory algorithms.
+in this class we used  several functions like : 
+1. bfs( node_data p) - Which Going through all the vertices and checking that everyone can be     reached.
+2. dfs(node_data) - Which Checks that you can get to any vertex and return from any vertex to everyone Who works in recursion and uses auxiliary function.
+3. inner_dfs(node_data p , boolean[ ] visited, int sum) - which Auxiliary function for dfs.
+
+this class contains several functions:
+
+void init(directed_weighted_graph g) :
+init the graph .
+
+directed_weight_graph getGraph() :
+return the the graph.
+
+directed_weght_graph copy() :
+Creates a deep copy of the graph.
+
+boolean isConnected():
+check if every there is a valid path from every node on the graph to the others.
+
+double shortestPathDist(int src, int dest):
+return the length of the shortest path between src to dest , if there non return -1.
+
+List<node_data> shortestPath(int src, int dest):
+return the the shortest path between src to dest as an list of nodes , if there non return null.
+
+boolean save(String file):
+saves the graph to the given file name.
+
+boolean load(String file):
+load a graph from the file to this graph algorithm.
