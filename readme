@@ -84,8 +84,7 @@ printing the data of the edge.
 Class WGraph_DS:
 
 This class represents the set of opretions applicable on graph in a directional weighted graph. 
-we implement this Graph with a two data structure one called HashMap<Integer,Value> graph and the second called HashMap<Integer,HashMap<Integer,edge_data>>neighbors.
- one contains the Nodes and the other one contains the nodes and all the  edges of the same node.
+we implement this Graph with a two data structure one called HashMap<Integer,Value> graph and the second called HashMap<Integer,HashMap<Integer,edge_data>>neighbors. one contains the Nodes and the other one contains the nodes and all the  edges of the same node.
 this class contains several functions:
 
 node_data getNode(int key):
@@ -153,3 +152,4 @@ saves the graph to the given file name.
 
 boolean load(String file):
 load a graph from the file to this graph algorithm.
+
